@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Training Schedule</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Plan your grappling and lifting workouts around your work schedule">
+    <meta name="theme-color" content="#764ba2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Training Schedule">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" href="smash.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="smash.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="smash.png">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dynamic Training Schedule</h1>
+        <p class="subtitle">Adapt your training around your work schedule</p>
+        
+        <div class="navigation-container">
+            <div class="month-navigation">
+                <button id="prevMonth" onclick="navigateMonth(-1)">‹ Previous</button>
+                <div class="current-month" id="currentMonth">January 2025</div>
+                <button id="nextMonth" onclick="navigateMonth(1)">Next ›</button>
+            </div>
+            <div class="week-navigation">
+                <button id="prevWeek" onclick="navigateWeek(-1)">‹ Previous</button>
+                <div class="current-week" id="currentWeek">Week of Jan 6-12</div>
+                <button id="nextWeek" onclick="navigateWeek(1)">Next ›</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="controls-header" onclick="toggleControls()">
+                <h3>Schedule Controls</h3>
+                <span class="toggle-icon" id="toggleIcon">▼</span>
+            </div>
+            <div class="controls-content" id="controlsContent">
+            <div class="control-group">
+                <div>
+                    <label for="workDay">Select Day:</label>
+                    <select id="workDay">
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="workStart">Work Start:</label>
+                    <input type="time" id="workStart" value="09:00">
+                </div>
+                <div>
+                    <label for="workEnd">Work End:</label>
+                    <input type="time" id="workEnd" value="17:00">
+                </div>
+                <div>
+                    <label for="workBtn">&nbsp;</label>
+                    <button id="workBtn" onclick="addWorkBlock()">Add Work Block</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div>
+                    <label for="trainingPriority">Training Priority:</label>
+                    <select id="trainingPriority">
+                        <option value="balanced">Balanced (3x Grappling, 3x Lifting)</option>
+                        <option value="grappling">Grappling Focus (4x Grappling, 2x Lifting)</option>
+                        <option value="lifting">Lifting Focus (4x Lifting, 2x Grappling)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="sessionLength">Session Length:</label>
+                    <select id="sessionLength">
+                        <option value="60">1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="generateBtn">&nbsp;</label>
+                    <button id="generateBtn" onclick="generateSchedule()">Generate Schedule</button>
+                </div>
+                <div>
+                    <label for="clearBtn">&nbsp;</label>
+                    <button id="clearBtn" onclick="clearSchedule()">Clear All</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div>
+                    <label for="exportBtn">&nbsp;</label>
+                    <button id="exportBtn" onclick="exportSchedule()">Export Data</button>
+                </div>
+                <div>
+                    <label for="importFile">Import Data:</label>
+                    <input type="file" id="importFile" accept=".json" onchange="importSchedule(event)">
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="schedule-grid" id="scheduleGrid">
+            <!-- Grid will be populated by JavaScript -->
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <span>Work</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <span>Sleep</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                <span>Eating</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                <span>Grappling</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></div>
+                <span>Lifting</span>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="workHours">0</div>
+                <div class="stat-label">Work Hours/Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="grapplingHours">0</div>
+                <div class="stat-label">Grappling Hours/Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="liftingHours">0</div>
+                <div class="stat-label">Lifting Hours/Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sleepHours">0</div>
+                <div class="stat-label">Sleep Hours/Week</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
